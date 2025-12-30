@@ -50,7 +50,7 @@
         }
         .week-box:hover {
             transform: scale(2.5);
-            z-index: 50;
+            z-index: 40;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             border-radius: 4px;
         }
@@ -78,7 +78,6 @@
 </head>
 <body class="flex flex-col min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-500 selection:bg-indigo-500 selection:text-white">
 
-    <!-- Hero / Header Section -->
     <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200/60 dark:border-slate-800/60 transition-colors duration-500">
         <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -92,11 +91,8 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <!-- Dark Mode Toggle -->
                 <button onclick="toggleTheme()" class="p-2 rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Alternar Tema">
-                    <!-- Sun Icon -->
                     <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    <!-- Moon Icon -->
                     <svg id="moon-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                 </button>
 
@@ -109,10 +105,8 @@
 
     <main class="flex-grow flex flex-col items-center justify-start py-8 px-4 sm:px-6 relative overflow-hidden">
         
-        <!-- Decorative background blobs -->
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-indigo-100/40 dark:bg-indigo-900/10 rounded-full blur-3xl -z-10 pointer-events-none transition-colors duration-500"></div>
 
-        <!-- Input Section (Shown if no date is saved) -->
         <div id="setup-panel" class="w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl shadow-indigo-100/50 dark:shadow-black/50 border border-white dark:border-slate-800 mb-8 hidden fade-in mt-10 transition-colors duration-500">
             <h2 class="text-2xl font-bold mb-3 text-center">Inicie sua Jornada</h2>
             <p class="text-slate-500 dark:text-slate-400 text-sm text-center mb-8 leading-relaxed">
@@ -131,31 +125,26 @@
             </div>
         </div>
 
-        <!-- Stats Section (Shown after generation) -->
         <div id="stats-panel" class="w-full max-w-6xl mb-10 hidden fade-in">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <!-- Card 1: Weeks -->
                 <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-center hover:shadow-md transition-all relative overflow-hidden group">
                     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
                     <span class="block text-3xl sm:text-4xl font-extrabold mb-1 tracking-tight" id="weeks-lived">0</span>
                     <span class="text-[10px] sm:text-xs font-bold text-indigo-500 uppercase tracking-widest">Semanas Vividas</span>
                 </div>
                 
-                <!-- Card 2: Months (NEW) -->
                 <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-center hover:shadow-md transition-all relative overflow-hidden group">
                     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-teal-500"></div>
                     <span class="block text-3xl sm:text-4xl font-extrabold text-slate-800 dark:text-slate-100 mb-1 tracking-tight" id="months-lived">0</span>
                     <span class="text-[10px] sm:text-xs font-bold text-teal-500 uppercase tracking-widest">Meses Vividos</span>
                 </div>
 
-                <!-- Card 3: Percentage -->
                 <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-center hover:shadow-md transition-all relative overflow-hidden">
                      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
                     <span class="block text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-1 tracking-tight" id="percentage-lived">0%</span>
                     <span class="text-[10px] sm:text-xs font-bold text-purple-500 uppercase tracking-widest">Vida (90 Anos)</span>
                 </div>
 
-                <!-- Card 4: Remaining -->
                 <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-center hover:shadow-md transition-all relative overflow-hidden">
                      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-pink-500"></div>
                     <span class="block text-3xl sm:text-4xl font-extrabold text-slate-400 dark:text-slate-500 mb-1 tracking-tight" id="weeks-left">0</span>
@@ -163,7 +152,6 @@
                 </div>
             </div>
 
-            <!-- Legend -->
             <div class="flex flex-wrap justify-center items-center gap-4 md:gap-8 text-sm text-slate-600 dark:text-slate-400 mb-2">
                 <div class="flex items-center gap-2">
                     <div class="w-3 h-3 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600"></div>
@@ -184,14 +172,11 @@
             </div>
         </div>
 
-        <!-- The Grid -->
         <div id="life-grid-container" class="hidden w-full max-w-[1200px] flex justify-center">
             <div id="life-grid" class="fade-in grid gap-[3px] mx-auto p-4 md:p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-800 transition-colors duration-500">
-                <!-- Grid items generated by JS -->
-            </div>
+                </div>
         </div>
 
-        <!-- Quote -->
         <div id="quote-panel" class="my-16 max-w-2xl text-center hidden fade-in px-4">
             <div class="w-16 h-1 bg-gradient-to-r from-transparent via-indigo-300 dark:via-indigo-700 to-transparent mx-auto mb-6"></div>
             <blockquote class="text-xl md:text-2xl text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
@@ -213,6 +198,44 @@
             </p>
         </div>
     </footer>
+
+    <div id="reset-modal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity fade-in"></div>
+
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-slate-100 dark:border-slate-800 ring-1 ring-slate-900/5 fade-in">
+                    
+                    <div class="bg-white dark:bg-slate-900 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/30 sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="h-6 w-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <h3 class="text-lg font-semibold leading-6 text-slate-900 dark:text-white" id="modal-title">Redefinir Jornada?</h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">
+                                        Isso apagará sua data de nascimento atual e recarregará a página para que você possa iniciar uma nova contagem.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-50 dark:bg-slate-950/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-3">
+                        <button type="button" onclick="confirmResetAction()" class="inline-flex w-full justify-center rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 sm:w-auto transition-colors">
+                            Sim, reiniciar
+                        </button>
+                        <button type="button" onclick="closeModal()" class="mt-3 inline-flex w-full justify-center rounded-xl bg-white dark:bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-slate-300 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 sm:mt-0 sm:w-auto transition-colors">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const EXPECTED_YEARS = 90;
@@ -266,12 +289,20 @@
             }
         });
 
+        // --- NEW MODAL FUNCTIONS ---
         function resetData() {
-            if(confirm("Deseja redefinir sua data de nascimento?")) {
-                localStorage.removeItem('birthdate');
-                location.reload();
-            }
+            document.getElementById('reset-modal').classList.remove('hidden');
         }
+
+        function closeModal() {
+            document.getElementById('reset-modal').classList.add('hidden');
+        }
+
+        function confirmResetAction() {
+            localStorage.removeItem('birthdate');
+            location.reload();
+        }
+        // ---------------------------
 
         function generateChart() {
             const input = document.getElementById('birthdate-input').value;
@@ -307,7 +338,6 @@
             let monthsLived = (today.getFullYear() - birthDate.getFullYear()) * 12;
             monthsLived -= birthDate.getMonth();
             monthsLived += today.getMonth();
-            // Adjustment if current day is less than birth day in the month
             if (today.getDate() < birthDate.getDate()) {
                 monthsLived--;
             }
@@ -354,21 +384,16 @@
                 let classes = "week-box w-2 h-2 sm:w-2.5 sm:h-2.5 ";
                 
                 if (isCurrent) {
-                    // THE CURRENT WEEK - Pulsing Gold/Amber (Priority over birthday)
                     classes += "bg-amber-400 current-week shadow-[0_0_10px_rgba(251,191,36,0.8)] scale-110 z-10 rounded-sm";
                 } else if (isBirthday) {
                     if (isLived) {
-                         // Lived Birthday - Pinkish Red
-                        classes += "bg-gradient-to-br from-pink-500 to-rose-600 shadow-[0_0_2px_rgba(244,63,94,0.5)] z-0";
+                         classes += "bg-gradient-to-br from-pink-500 to-rose-600 shadow-[0_0_2px_rgba(244,63,94,0.5)] z-0";
                     } else {
-                         // Future Birthday - Soft Pink
-                        classes += "bg-rose-200 dark:bg-rose-900/40 hover:bg-rose-300 dark:hover:bg-rose-800";
+                         classes += "bg-rose-200 dark:bg-rose-900/40 hover:bg-rose-300 dark:hover:bg-rose-800";
                     }
                 } else if (isLived) {
-                    // Lived weeks - Gradient
                     classes += "bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 shadow-[0_0_2px_rgba(99,102,241,0.3)]";
                 } else {
-                    // Future weeks
                     classes += "bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700";
                 }
 
