@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sua Vida em Semanas | Memento Mori</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -13,12 +13,16 @@
                 extend: {
                     fontFamily: {
                         sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
                         slate: {
                             850: '#1e293b', 
                             950: '#020617',
                         }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
             }
@@ -43,6 +47,16 @@
             background: #94a3b8; 
         }
         
+        /* Remove default arrow/spin buttons from number input */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         .week-box {
             aspect-ratio: 1;
             transition: all 0.2s ease;
@@ -73,6 +87,17 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Glass effect for the timer */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(30, 41, 59, 0.5);
         }
     </style>
 </head>
@@ -111,17 +136,87 @@
             <h2 class="text-2xl font-bold mb-3 text-center">Inicie sua Jornada</h2>
             <p class="text-slate-500 dark:text-slate-400 text-sm text-center mb-8 leading-relaxed">
                 "A vida é longa o bastante se soubermos usá-la."<br>
-                Insira sua data de nascimento para visualizar seu tempo.
+                Configure sua jornada pessoal.
             </p>
             
-            <div class="flex flex-col gap-5">
+            <div class="flex flex-col gap-6">
                 <div class="relative">
-                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 ml-1">Data de Nascimento</label>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Data de Nascimento</label>
                     <input type="date" id="birthdate-input" class="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none font-medium transition-all hover:bg-white dark:hover:bg-slate-750 dark:text-white dark:calendar-invert">
                 </div>
-                <button onclick="generateChart()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all active:scale-[0.98]">
+                
+                <div class="relative">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Expectativa de Vida (Anos)</label>
+                    
+                    <!-- New Stepper Control -->
+                    <div class="flex items-center h-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all hover:bg-white dark:hover:bg-slate-750">
+                        <button type="button" onclick="adjustExpectancy(-1)" class="w-14 h-full flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors active:scale-95">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                        </button>
+                        
+                        <input type="number" id="expectancy-input" value="80" min="1" max="120" class="flex-1 h-full text-center bg-transparent border-none focus:ring-0 outline-none font-bold text-lg text-slate-700 dark:text-slate-200" placeholder="80">
+                        
+                        <button type="button" onclick="adjustExpectancy(1)" class="w-14 h-full flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors active:scale-95">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="generateChart()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all active:scale-[0.98] mt-2">
                     Visualizar Minha Vida
                 </button>
+            </div>
+        </div>
+
+        <div id="live-timer-panel" class="hidden w-full max-w-6xl mb-6 fade-in">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl shadow-lg relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 via-purple-500 to-pink-500"></div>
+                
+                <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">Tempo em Movimento</h3>
+                
+                <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-8 md:gap-12 select-none">
+                    
+                    <!-- Anos -->
+                    <div class="flex flex-col items-center">
+                        <span id="timer-years" class="font-mono text-3xl sm:text-5xl font-bold text-slate-800 dark:text-slate-200 tracking-tight tabular-nums">00</span>
+                        <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest mt-1">Anos</span>
+                    </div>
+
+                    <div class="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+
+                    <!-- Dias -->
+                    <div class="flex flex-col items-center">
+                        <span id="timer-days" class="font-mono text-3xl sm:text-5xl font-bold text-slate-800 dark:text-slate-200 tracking-tight tabular-nums">000</span>
+                        <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest mt-1">Dias</span>
+                    </div>
+
+                    <div class="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+
+                    <!-- Horas -->
+                    <div class="flex flex-col items-center">
+                        <span id="timer-hours" class="font-mono text-3xl sm:text-5xl font-bold text-indigo-600 dark:text-indigo-400 tracking-tight tabular-nums">00</span>
+                        <span class="text-[10px] sm:text-xs text-indigo-500/70 uppercase tracking-widest mt-1">Horas</span>
+                    </div>
+
+                    <span class="text-2xl sm:text-4xl font-light text-slate-300 dark:text-slate-700 animate-pulse">:</span>
+
+                    <!-- Minutos -->
+                    <div class="flex flex-col items-center">
+                        <span id="timer-minutes" class="font-mono text-3xl sm:text-5xl font-bold text-indigo-600 dark:text-indigo-400 tracking-tight tabular-nums">00</span>
+                        <span class="text-[10px] sm:text-xs text-indigo-500/70 uppercase tracking-widest mt-1">Min</span>
+                    </div>
+
+                    <span class="text-2xl sm:text-4xl font-light text-slate-300 dark:text-slate-700 animate-pulse">:</span>
+
+                    <!-- Segundos -->
+                    <div class="flex flex-col items-center relative">
+                        <span id="timer-seconds" class="font-mono text-3xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-500 to-purple-600 tracking-tight tabular-nums min-w-[1.5em] text-center">00</span>
+                        <span class="text-[10px] sm:text-xs text-purple-500/70 uppercase tracking-widest mt-1">Seg</span>
+                        
+                        <!-- Glow effect behind seconds -->
+                        <div class="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full -z-10 animate-pulse-slow"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -142,7 +237,7 @@
                 <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-center hover:shadow-md transition-all relative overflow-hidden">
                      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
                     <span class="block text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-1 tracking-tight" id="percentage-lived">0%</span>
-                    <span class="text-[10px] sm:text-xs font-bold text-purple-500 uppercase tracking-widest">Vida (90 Anos)</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-purple-500 uppercase tracking-widest" id="life-total-label">Vida (90 Anos)</span>
                 </div>
 
                 <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-center hover:shadow-md transition-all relative overflow-hidden">
@@ -173,8 +268,9 @@
         </div>
 
         <div id="life-grid-container" class="hidden w-full max-w-[1200px] flex justify-center">
-            <div id="life-grid" class="fade-in grid gap-[3px] mx-auto p-4 md:p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-800 transition-colors duration-500">
-                </div>
+            <!-- Grid container with responsive classes built-in -->
+            <div id="life-grid" class="fade-in grid gap-[2px] sm:gap-[3px] mx-auto p-3 sm:p-6 bg-white dark:bg-slate-900 rounded-xl sm:rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-800 transition-colors duration-500 grid-cols-[repeat(26,minmax(0,1fr))] sm:grid-cols-[repeat(52,minmax(0,1fr))]">
+            </div>
         </div>
 
         <div id="quote-panel" class="my-16 max-w-2xl text-center hidden fade-in px-4">
@@ -199,7 +295,7 @@
         </div>
     </footer>
 
-    <div id="reset-modal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="reset-modal" class="relative z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity fade-in"></div>
 
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -217,7 +313,7 @@
                                 <h3 class="text-lg font-semibold leading-6 text-slate-900 dark:text-white" id="modal-title">Redefinir Jornada?</h3>
                                 <div class="mt-2">
                                     <p class="text-sm text-slate-500 dark:text-slate-400">
-                                        Isso apagará sua data de nascimento atual e recarregará a página para que você possa iniciar uma nova contagem.
+                                        Isso apagará seus dados atuais e recarregará a página para que você possa iniciar uma nova contagem.
                                     </p>
                                 </div>
                             </div>
@@ -225,7 +321,7 @@
                     </div>
                     
                     <div class="bg-slate-50 dark:bg-slate-950/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-3">
-                        <button type="button" onclick="confirmResetAction()" class="inline-flex w-full justify-center rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 sm:w-auto transition-colors">
+                        <button type="button" onclick="confirmResetAction()" class="inline-flex w-full justify-center rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-50 sm:w-auto transition-colors">
                             Sim, reiniciar
                         </button>
                         <button type="button" onclick="closeModal()" class="mt-3 inline-flex w-full justify-center rounded-xl bg-white dark:bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-slate-300 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 sm:mt-0 sm:w-auto transition-colors">
@@ -238,9 +334,8 @@
     </div>
 
     <script>
-        const EXPECTED_YEARS = 90;
         const WEEKS_PER_YEAR = 52;
-        const TOTAL_WEEKS = EXPECTED_YEARS * WEEKS_PER_YEAR;
+        let timerInterval;
 
         // Theme Handling
         function toggleTheme() {
@@ -278,18 +373,32 @@
             }
         }
 
+        // Stepper Function for Life Expectancy
+        function adjustExpectancy(change) {
+            const input = document.getElementById('expectancy-input');
+            let currentValue = parseInt(input.value) || 80;
+            let newValue = currentValue + change;
+            
+            // Validate limits
+            if (newValue < 1) newValue = 1;
+            if (newValue > 120) newValue = 120;
+            
+            input.value = newValue;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
             const savedDate = localStorage.getItem('birthdate');
+            const savedExpectancy = localStorage.getItem('lifeExpectancy');
             
-            if (savedDate) {
-                renderApp(new Date(savedDate));
+            if (savedDate && savedExpectancy) {
+                renderApp(new Date(savedDate), parseInt(savedExpectancy));
             } else {
                 document.getElementById('setup-panel').classList.remove('hidden');
             }
         });
 
-        // --- NEW MODAL FUNCTIONS ---
+        // --- MODAL FUNCTIONS ---
         function resetData() {
             document.getElementById('reset-modal').classList.remove('hidden');
         }
@@ -299,19 +408,46 @@
         }
 
         function confirmResetAction() {
+            // Limpar dados
             localStorage.removeItem('birthdate');
-            location.reload();
+            localStorage.removeItem('lifeExpectancy');
+            
+            // Parar timer
+            if (timerInterval) clearInterval(timerInterval);
+            
+            // Fechar modal
+            closeModal();
+
+            // Resetar UI manualmente
+            document.getElementById('setup-panel').classList.remove('hidden');
+            
+            // Esconder painéis do app
+            document.getElementById('live-timer-panel').classList.add('hidden');
+            document.getElementById('stats-panel').classList.add('hidden');
+            document.getElementById('life-grid-container').classList.add('hidden');
+            document.getElementById('quote-panel').classList.add('hidden');
+            
+            // Limpar input e grid
+            document.getElementById('birthdate-input').value = '';
+            document.getElementById('expectancy-input').value = '80'; // Reset para padrão
+            document.getElementById('life-grid').innerHTML = '';
         }
-        // ---------------------------
 
         function generateChart() {
-            const input = document.getElementById('birthdate-input').value;
-            if (!input) {
+            const dateInput = document.getElementById('birthdate-input').value;
+            const expectancyInput = document.getElementById('expectancy-input').value;
+
+            if (!dateInput) {
                 alert("Por favor, selecione uma data de nascimento.");
                 return;
             }
 
-            const birthDate = new Date(input);
+            if (!expectancyInput || expectancyInput < 1) {
+                alert("Por favor, insira uma expectativa de vida válida.");
+                return;
+            }
+
+            const birthDate = new Date(dateInput);
             const today = new Date();
             
             if (birthDate > today) {
@@ -319,15 +455,17 @@
                 return;
             }
 
-            localStorage.setItem('birthdate', input);
+            localStorage.setItem('birthdate', dateInput);
+            localStorage.setItem('lifeExpectancy', expectancyInput);
             
             // Hide setup, show animation
             document.getElementById('setup-panel').classList.add('hidden');
-            renderApp(birthDate);
+            renderApp(birthDate, parseInt(expectancyInput));
         }
 
-        function renderApp(birthDate) {
+        function renderApp(birthDate, expectedYears) {
             const today = new Date();
+            const totalWeeks = expectedYears * WEEKS_PER_YEAR;
             
             // Calculate weeks lived
             const timeDiff = today.getTime() - birthDate.getTime();
@@ -342,10 +480,13 @@
                 monthsLived--;
             }
             
-            const weeksLeft = Math.max(0, TOTAL_WEEKS - weeksLived);
-            const percentage = Math.min(100, ((weeksLived / TOTAL_WEEKS) * 100)).toFixed(1);
+            const weeksLeft = Math.max(0, totalWeeks - weeksLived);
+            const percentage = Math.min(100, ((weeksLived / totalWeeks) * 100)).toFixed(1);
 
-            // Update Stats
+            // Update Stats Labels
+            document.getElementById('life-total-label').innerText = `Vida (${expectedYears} Anos)`;
+            
+            // Update Stats Values
             document.getElementById('weeks-lived').innerText = weeksLived.toLocaleString();
             document.getElementById('months-lived').innerText = monthsLived.toLocaleString();
             document.getElementById('percentage-lived').innerText = percentage + "%";
@@ -353,26 +494,53 @@
 
             // Show Panels
             document.getElementById('stats-panel').classList.remove('hidden');
+            document.getElementById('live-timer-panel').classList.remove('hidden');
             document.getElementById('quote-panel').classList.remove('hidden');
             document.getElementById('life-grid-container').classList.remove('hidden');
             
-            renderGrid(weeksLived);
+            renderGrid(weeksLived, totalWeeks);
+            startLiveTimer(birthDate);
         }
 
-        function renderGrid(weeksLived) {
+        // --- LIVE TIMER LOGIC ---
+        function startLiveTimer(birthDate) {
+            const yearsEl = document.getElementById('timer-years');
+            const daysEl = document.getElementById('timer-days');
+            const hoursEl = document.getElementById('timer-hours');
+            const minsEl = document.getElementById('timer-minutes');
+            const secsEl = document.getElementById('timer-seconds');
+
+            const updateTimer = () => {
+                const now = new Date();
+                const diff = now - birthDate; // Difference in milliseconds
+
+                // Calculations
+                const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+                const days = Math.floor((diff % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                // Update DOM (formatting with leading zeros for time)
+                yearsEl.innerText = years;
+                daysEl.innerText = days;
+                hoursEl.innerText = hours.toString().padStart(2, '0');
+                minsEl.innerText = minutes.toString().padStart(2, '0');
+                secsEl.innerText = seconds.toString().padStart(2, '0');
+            };
+
+            updateTimer(); // Run immediately
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function renderGrid(weeksLived, totalWeeks) {
             const grid = document.getElementById('life-grid');
             grid.innerHTML = '';
-
-            // Responsive columns
-            if (window.innerWidth < 640) {
-                grid.className = "fade-in grid grid-cols-[repeat(26,minmax(0,1fr))] gap-[2px] mx-auto p-3 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-100 dark:border-slate-800 transition-colors duration-500";
-            } else {
-                grid.className = "fade-in grid grid-cols-[repeat(52,minmax(0,1fr))] gap-[3px] mx-auto p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-800 transition-colors duration-500";
-            }
             
             const fragment = document.createDocumentFragment();
 
-            for (let i = 0; i < TOTAL_WEEKS; i++) {
+            for (let i = 0; i < totalWeeks; i++) {
                 const box = document.createElement('div');
                 
                 // Determine state
@@ -416,16 +584,6 @@
 
             grid.appendChild(fragment);
         }
-
-        window.addEventListener('resize', () => {
-            const savedDate = localStorage.getItem('birthdate');
-            if (savedDate) {
-                const birthDate = new Date(savedDate);
-                const timeDiff = new Date().getTime() - birthDate.getTime();
-                const weeksLived = Math.floor(Math.floor(timeDiff / (1000 * 3600 * 24)) / 7);
-                renderGrid(weeksLived);
-            }
-        });
     </script>
 </body>
 </html>
