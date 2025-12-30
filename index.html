@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sua Vida em Semanas | Memento Mori</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#1e293b', 
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        .week-box {
+            aspect-ratio: 1;
+            transition: all 0.2s ease;
+            border-radius: 2px;
+        }
+        .week-box:hover {
+            transform: scale(2.5);
+            z-index: 50;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+        
+        /* Pulse animation for current week */
+        @keyframes pulse-gold {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7); transform: scale(1); }
+            50% { box-shadow: 0 0 0 4px rgba(234, 179, 8, 0); transform: scale(1.2); }
+        }
+        
+        .current-week {
+            animation: pulse-gold 2s infinite;
+            z-index: 10;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-500 selection:bg-indigo-500 selection:text-white">
+
+    <!-- Hero / Header Section -->
+    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200/60 dark:border-slate-800/60 transition-colors duration-500">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-indigo-500/20">
+                    M
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Memento Mori</h1>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-semibold">Sua Vida em Semanas</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Dark Mode Toggle -->
+                <button onclick="toggleTheme()" class="p-2 rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Alternar Tema">
+                    <!-- Sun Icon -->
+                    <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <!-- Moon Icon -->
+                    <svg id="moon-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+
+                <button onclick="resetData()" class="text-xs font-medium text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors px-3 py-1.5 rounded-full hover:bg-rose-50 dark:hover:bg-rose-900/20" title="Limpar dados">
+                    Reiniciar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center justify-start py-8 px-4 sm:px-6 relative overflow-hidden">
+        
+        <!-- Decorative background blobs -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-indigo-100/40 dark:bg-indigo-900/10 rounded-full blur-3xl -z-10 pointer-events-none transition-colors duration-500"></div>
+
+        <!-- Input Section (Shown if no date is saved) -->
+        <div id="setup-panel" class="w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl shadow-indigo-100/50 dark:shadow-black/50 border border-white dark:border-slate-800 mb-8 hidden fade-in mt-10 transition-colors duration-500">
+            <h2 class="text-2xl font-bold mb-3 text-center">Inicie sua Jornada</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm text-center mb-8 leading-relaxed">
+                "A vida é longa o bastante se soubermos usá-la."<br>
+                Insira sua data de nascimento para visualizar seu tempo.
+            </p>
+            
+            <div class="flex flex-col gap-5">
+                <div class="relative">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 ml-1">Data de Nascimento</label>
+                    <input type="date" id="birthdate-input" class="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none font-medium transition-all hover:bg-white dark:hover:bg-slate-750 dark:text-white dark:calendar-invert">
+                </div>
+                <button onclick="generateChart()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all active:scale-[0.98]">
+                    Visualizar Minha Vida
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Section (Shown after generation) -->
+        <div id="stats-panel" class="w-full max-w-6xl mb-10 hidden fade-in">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <!-- Card 1: Weeks -->
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-center hover:shadow-md transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
+                    <span class="block text-3xl sm:text-4xl font-extrabold mb-1 tracking-tight" id="weeks-lived">0</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-indigo-500 uppercase tracking-widest">Semanas Vividas</span>
+                </div>
+                
+                <!-- Card 2: Months (NEW) -->
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-center hover:shadow-md transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-teal-500"></div>
+                    <span class="block text-3xl sm:text-4xl font-extrabold text-slate-800 dark:text-slate-100 mb-1 tracking-tight" id="months-lived">0</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-teal-500 uppercase tracking-widest">Meses Vividos</span>
+                </div>
+
+                <!-- Card 3: Percentage -->
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-center hover:shadow-md transition-all relative overflow-hidden">
+                     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+                    <span class="block text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-1 tracking-tight" id="percentage-lived">0%</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-purple-500 uppercase tracking-widest">Vida (90 Anos)</span>
+                </div>
+
+                <!-- Card 4: Remaining -->
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-center hover:shadow-md transition-all relative overflow-hidden">
+                     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-pink-500"></div>
+                    <span class="block text-3xl sm:text-4xl font-extrabold text-slate-400 dark:text-slate-500 mb-1 tracking-tight" id="weeks-left">0</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Semanas Restantes</span>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="flex flex-wrap justify-center items-center gap-4 md:gap-8 text-sm text-slate-600 dark:text-slate-400 mb-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600"></div>
+                    <span>Passado</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-sm bg-gradient-to-br from-pink-500 to-rose-600 shadow-[0_0_5px_rgba(244,63,94,0.4)]"></div>
+                    <span>Aniversário</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-sm bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]"></div>
+                    <span class="font-bold text-amber-600 dark:text-amber-400">Esta Semana</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+                    <span>Futuro</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Grid -->
+        <div id="life-grid-container" class="hidden w-full max-w-[1200px] flex justify-center">
+            <div id="life-grid" class="fade-in grid gap-[3px] mx-auto p-4 md:p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-800 transition-colors duration-500">
+                <!-- Grid items generated by JS -->
+            </div>
+        </div>
+
+        <!-- Quote -->
+        <div id="quote-panel" class="my-16 max-w-2xl text-center hidden fade-in px-4">
+            <div class="w-16 h-1 bg-gradient-to-r from-transparent via-indigo-300 dark:via-indigo-700 to-transparent mx-auto mb-6"></div>
+            <blockquote class="text-xl md:text-2xl text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                "Não é que tenhamos pouco tempo,<br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">mas desperdiçamos muito dele.</span>"
+            </blockquote>
+            <cite class="block mt-4 text-sm font-bold text-slate-400 dark:text-slate-500 not-italic uppercase tracking-widest">— Sêneca</cite>
+        </div>
+
+    </main>
+
+    <footer class="bg-white dark:bg-slate-900 py-8 border-t border-slate-100 dark:border-slate-800 mt-auto transition-colors duration-500">
+        <div class="flex flex-col items-center justify-center gap-2 px-4">
+            <p class="text-center text-slate-400 dark:text-slate-500 text-xs font-medium">
+                Cada quadrado é uma semana. Cada linha é um ano (aproximadamente).<br>
+                Memento Mori.
+            </p>
+            <p class="text-center text-slate-400 dark:text-slate-500 text-xs mt-4 opacity-75">
+                Site criado por Felipe Gianini Romero
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const EXPECTED_YEARS = 90;
+        const WEEKS_PER_YEAR = 52;
+        const TOTAL_WEEKS = EXPECTED_YEARS * WEEKS_PER_YEAR;
+
+        // Theme Handling
+        function toggleTheme() {
+            const html = document.documentElement;
+            const sun = document.getElementById('sun-icon');
+            const moon = document.getElementById('moon-icon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                sun.classList.add('hidden');
+                moon.classList.remove('hidden');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                moon.classList.add('hidden');
+                sun.classList.remove('hidden');
+            }
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const html = document.documentElement;
+            const sun = document.getElementById('sun-icon');
+            const moon = document.getElementById('moon-icon');
+
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+                moon.classList.add('hidden');
+                sun.classList.remove('hidden');
+            } else {
+                html.classList.remove('dark');
+                sun.classList.add('hidden');
+                moon.classList.remove('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            const savedDate = localStorage.getItem('birthdate');
+            
+            if (savedDate) {
+                renderApp(new Date(savedDate));
+            } else {
+                document.getElementById('setup-panel').classList.remove('hidden');
+            }
+        });
+
+        function resetData() {
+            if(confirm("Deseja redefinir sua data de nascimento?")) {
+                localStorage.removeItem('birthdate');
+                location.reload();
+            }
+        }
+
+        function generateChart() {
+            const input = document.getElementById('birthdate-input').value;
+            if (!input) {
+                alert("Por favor, selecione uma data de nascimento.");
+                return;
+            }
+
+            const birthDate = new Date(input);
+            const today = new Date();
+            
+            if (birthDate > today) {
+                alert("A data deve ser no passado.");
+                return;
+            }
+
+            localStorage.setItem('birthdate', input);
+            
+            // Hide setup, show animation
+            document.getElementById('setup-panel').classList.add('hidden');
+            renderApp(birthDate);
+        }
+
+        function renderApp(birthDate) {
+            const today = new Date();
+            
+            // Calculate weeks lived
+            const timeDiff = today.getTime() - birthDate.getTime();
+            const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+            const weeksLived = Math.floor(daysDiff / 7);
+            
+            // Calculate months lived
+            let monthsLived = (today.getFullYear() - birthDate.getFullYear()) * 12;
+            monthsLived -= birthDate.getMonth();
+            monthsLived += today.getMonth();
+            // Adjustment if current day is less than birth day in the month
+            if (today.getDate() < birthDate.getDate()) {
+                monthsLived--;
+            }
+            
+            const weeksLeft = Math.max(0, TOTAL_WEEKS - weeksLived);
+            const percentage = Math.min(100, ((weeksLived / TOTAL_WEEKS) * 100)).toFixed(1);
+
+            // Update Stats
+            document.getElementById('weeks-lived').innerText = weeksLived.toLocaleString();
+            document.getElementById('months-lived').innerText = monthsLived.toLocaleString();
+            document.getElementById('percentage-lived').innerText = percentage + "%";
+            document.getElementById('weeks-left').innerText = weeksLeft.toLocaleString();
+
+            // Show Panels
+            document.getElementById('stats-panel').classList.remove('hidden');
+            document.getElementById('quote-panel').classList.remove('hidden');
+            document.getElementById('life-grid-container').classList.remove('hidden');
+            
+            renderGrid(weeksLived);
+        }
+
+        function renderGrid(weeksLived) {
+            const grid = document.getElementById('life-grid');
+            grid.innerHTML = '';
+
+            // Responsive columns
+            if (window.innerWidth < 640) {
+                grid.className = "fade-in grid grid-cols-[repeat(26,minmax(0,1fr))] gap-[2px] mx-auto p-3 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-100 dark:border-slate-800 transition-colors duration-500";
+            } else {
+                grid.className = "fade-in grid grid-cols-[repeat(52,minmax(0,1fr))] gap-[3px] mx-auto p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-800 transition-colors duration-500";
+            }
+            
+            const fragment = document.createDocumentFragment();
+
+            for (let i = 0; i < TOTAL_WEEKS; i++) {
+                const box = document.createElement('div');
+                
+                // Determine state
+                const isLived = i < weeksLived;
+                const isCurrent = i === weeksLived;
+                const isBirthday = (i % 52 === 0);
+                
+                // Base classes
+                let classes = "week-box w-2 h-2 sm:w-2.5 sm:h-2.5 ";
+                
+                if (isCurrent) {
+                    // THE CURRENT WEEK - Pulsing Gold/Amber (Priority over birthday)
+                    classes += "bg-amber-400 current-week shadow-[0_0_10px_rgba(251,191,36,0.8)] scale-110 z-10 rounded-sm";
+                } else if (isBirthday) {
+                    if (isLived) {
+                         // Lived Birthday - Pinkish Red
+                        classes += "bg-gradient-to-br from-pink-500 to-rose-600 shadow-[0_0_2px_rgba(244,63,94,0.5)] z-0";
+                    } else {
+                         // Future Birthday - Soft Pink
+                        classes += "bg-rose-200 dark:bg-rose-900/40 hover:bg-rose-300 dark:hover:bg-rose-800";
+                    }
+                } else if (isLived) {
+                    // Lived weeks - Gradient
+                    classes += "bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 shadow-[0_0_2px_rgba(99,102,241,0.3)]";
+                } else {
+                    // Future weeks
+                    classes += "bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700";
+                }
+
+                box.className = classes;
+                
+                // Tooltip
+                const yearNum = Math.floor(i / 52);
+                const weekNum = (i % 52) + 1;
+                
+                if (isCurrent) {
+                    box.title = `VOCÊ ESTÁ AQUI! Ano ${yearNum}, Semana ${weekNum}`;
+                } else if (isBirthday) {
+                     box.title = `Aniversário de ${yearNum} anos!`;
+                } else {
+                    box.title = `${yearNum} anos, semana ${weekNum}`;
+                }
+
+                fragment.appendChild(box);
+            }
+
+            grid.appendChild(fragment);
+        }
+
+        window.addEventListener('resize', () => {
+            const savedDate = localStorage.getItem('birthdate');
+            if (savedDate) {
+                const birthDate = new Date(savedDate);
+                const timeDiff = new Date().getTime() - birthDate.getTime();
+                const weeksLived = Math.floor(Math.floor(timeDiff / (1000 * 3600 * 24)) / 7);
+                renderGrid(weeksLived);
+            }
+        });
+    </script>
+</body>
+</html>
