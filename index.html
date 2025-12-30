@@ -168,11 +168,18 @@
             </div>
         </div>
 
-        <div id="live-timer-panel" class="hidden w-full max-w-6xl mb-6 fade-in">
+        <div id="live-timer-panel" class="hidden w-full max-w-6xl mb-6 fade-in relative">
             <div class="glass-panel p-6 sm:p-8 rounded-3xl shadow-lg relative overflow-hidden group">
                 <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 via-purple-500 to-pink-500"></div>
                 
-                <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">Tempo em Movimento</h3>
+                <!-- Toggle Button -->
+                <div class="absolute top-4 right-4 z-20">
+                    <button onclick="toggleTimerMode()" class="text-[10px] uppercase tracking-wider font-bold text-indigo-500 hover:text-indigo-600 bg-white/50 hover:bg-white/80 dark:bg-slate-800/50 dark:hover:bg-slate-800/80 backdrop-blur px-3 py-1.5 rounded-full transition-all border border-transparent hover:border-indigo-100 dark:hover:border-slate-700 shadow-sm" id="timer-toggle-btn">
+                        Ver Tempo Restante
+                    </button>
+                </div>
+
+                <h3 id="timer-title" class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 text-center transition-all">Sua Idade Cronológica</h3>
                 
                 <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-8 md:gap-12 select-none">
                     
@@ -336,6 +343,9 @@
     <script>
         const WEEKS_PER_YEAR = 52;
         let timerInterval;
+        let timerMode = 'elapsed'; // 'elapsed' or 'remaining'
+        let currentBirthDate = null;
+        let currentExpectancy = null;
 
         // Theme Handling
         function toggleTheme() {
@@ -384,6 +394,31 @@
             if (newValue > 120) newValue = 120;
             
             input.value = newValue;
+        }
+
+        // Timer Toggle Function
+        function toggleTimerMode() {
+            const btn = document.getElementById('timer-toggle-btn');
+            const title = document.getElementById('timer-title');
+
+            if (timerMode === 'elapsed') {
+                timerMode = 'remaining';
+                btn.innerText = "Ver Idade Atual";
+                title.innerText = "Tempo Restante Estimado";
+                title.classList.add('text-rose-400');
+                title.classList.remove('text-slate-400', 'dark:text-slate-500');
+            } else {
+                timerMode = 'elapsed';
+                btn.innerText = "Ver Tempo Restante";
+                title.innerText = "Sua Idade Cronológica";
+                title.classList.remove('text-rose-400');
+                title.classList.add('text-slate-400', 'dark:text-slate-500');
+            }
+
+            // Restart timer with new mode if data exists
+            if (currentBirthDate && currentExpectancy) {
+                startLiveTimer(currentBirthDate, currentExpectancy);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -464,6 +499,9 @@
         }
 
         function renderApp(birthDate, expectedYears) {
+            currentBirthDate = birthDate;
+            currentExpectancy = expectedYears;
+
             const today = new Date();
             const totalWeeks = expectedYears * WEEKS_PER_YEAR;
             
@@ -499,20 +537,32 @@
             document.getElementById('life-grid-container').classList.remove('hidden');
             
             renderGrid(weeksLived, totalWeeks);
-            startLiveTimer(birthDate);
+            startLiveTimer(birthDate, expectedYears);
         }
 
         // --- LIVE TIMER LOGIC ---
-        function startLiveTimer(birthDate) {
+        function startLiveTimer(birthDate, expectedYears) {
             const yearsEl = document.getElementById('timer-years');
             const daysEl = document.getElementById('timer-days');
             const hoursEl = document.getElementById('timer-hours');
             const minsEl = document.getElementById('timer-minutes');
             const secsEl = document.getElementById('timer-seconds');
 
+            const deathDate = new Date(birthDate);
+            deathDate.setFullYear(birthDate.getFullYear() + expectedYears);
+
             const updateTimer = () => {
                 const now = new Date();
-                const diff = now - birthDate; // Difference in milliseconds
+                let diff;
+
+                if (timerMode === 'elapsed') {
+                    // Time since birth (Age)
+                    diff = now - birthDate;
+                } else {
+                    // Time until death (Remaining)
+                    diff = deathDate - now;
+                    if (diff < 0) diff = 0;
+                }
 
                 // Calculations
                 const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
