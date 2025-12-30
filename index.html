@@ -181,44 +181,45 @@
 
                 <h3 id="timer-title" class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 text-center transition-all">Sua Idade Cronológica</h3>
                 
-                <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-8 md:gap-12 select-none">
+                <!-- Updated Timer Layout: flex-nowrap + responsive adjustments -->
+                <div class="flex flex-nowrap justify-center items-center gap-1.5 sm:gap-8 md:gap-12 select-none">
                     
                     <!-- Anos -->
                     <div class="flex flex-col items-center">
-                        <span id="timer-years" class="font-mono text-3xl sm:text-5xl font-bold text-slate-800 dark:text-slate-200 tracking-tight tabular-nums">00</span>
-                        <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest mt-1">Anos</span>
+                        <span id="timer-years" class="font-mono text-2xl sm:text-5xl font-bold text-slate-800 dark:text-slate-200 tracking-tight tabular-nums">00</span>
+                        <span class="text-[9px] sm:text-xs text-slate-400 uppercase tracking-widest mt-1">Anos</span>
                     </div>
 
                     <div class="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
 
                     <!-- Dias -->
                     <div class="flex flex-col items-center">
-                        <span id="timer-days" class="font-mono text-3xl sm:text-5xl font-bold text-slate-800 dark:text-slate-200 tracking-tight tabular-nums">000</span>
-                        <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest mt-1">Dias</span>
+                        <span id="timer-days" class="font-mono text-2xl sm:text-5xl font-bold text-slate-800 dark:text-slate-200 tracking-tight tabular-nums">000</span>
+                        <span class="text-[9px] sm:text-xs text-slate-400 uppercase tracking-widest mt-1">Dias</span>
                     </div>
 
                     <div class="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
 
                     <!-- Horas -->
                     <div class="flex flex-col items-center">
-                        <span id="timer-hours" class="font-mono text-3xl sm:text-5xl font-bold text-indigo-600 dark:text-indigo-400 tracking-tight tabular-nums">00</span>
-                        <span class="text-[10px] sm:text-xs text-indigo-500/70 uppercase tracking-widest mt-1">Horas</span>
+                        <span id="timer-hours" class="font-mono text-2xl sm:text-5xl font-bold text-indigo-600 dark:text-indigo-400 tracking-tight tabular-nums">00</span>
+                        <span class="text-[9px] sm:text-xs text-indigo-500/70 uppercase tracking-widest mt-1">Horas</span>
                     </div>
 
-                    <span class="text-2xl sm:text-4xl font-light text-slate-300 dark:text-slate-700 animate-pulse">:</span>
+                    <span class="text-xl sm:text-4xl font-light text-slate-300 dark:text-slate-700 animate-pulse">:</span>
 
                     <!-- Minutos -->
                     <div class="flex flex-col items-center">
-                        <span id="timer-minutes" class="font-mono text-3xl sm:text-5xl font-bold text-indigo-600 dark:text-indigo-400 tracking-tight tabular-nums">00</span>
-                        <span class="text-[10px] sm:text-xs text-indigo-500/70 uppercase tracking-widest mt-1">Min</span>
+                        <span id="timer-minutes" class="font-mono text-2xl sm:text-5xl font-bold text-indigo-600 dark:text-indigo-400 tracking-tight tabular-nums">00</span>
+                        <span class="text-[9px] sm:text-xs text-indigo-500/70 uppercase tracking-widest mt-1">Min</span>
                     </div>
 
-                    <span class="text-2xl sm:text-4xl font-light text-slate-300 dark:text-slate-700 animate-pulse">:</span>
+                    <span class="text-xl sm:text-4xl font-light text-slate-300 dark:text-slate-700 animate-pulse">:</span>
 
                     <!-- Segundos -->
                     <div class="flex flex-col items-center relative">
-                        <span id="timer-seconds" class="font-mono text-3xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-500 to-purple-600 tracking-tight tabular-nums min-w-[1.5em] text-center">00</span>
-                        <span class="text-[10px] sm:text-xs text-purple-500/70 uppercase tracking-widest mt-1">Seg</span>
+                        <span id="timer-seconds" class="font-mono text-2xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-500 to-purple-600 tracking-tight tabular-nums min-w-[1.5em] text-center">00</span>
+                        <span class="text-[9px] sm:text-xs text-purple-500/70 uppercase tracking-widest mt-1">Seg</span>
                         
                         <!-- Glow effect behind seconds -->
                         <div class="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full -z-10 animate-pulse-slow"></div>
@@ -421,13 +422,19 @@
             }
         }
 
+        // Helper: Parse date as local midnight (avoids UTC offset issues)
+        function parseLocalMidnight(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            return new Date(year, month - 1, day);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
             const savedDate = localStorage.getItem('birthdate');
             const savedExpectancy = localStorage.getItem('lifeExpectancy');
             
             if (savedDate && savedExpectancy) {
-                renderApp(new Date(savedDate), parseInt(savedExpectancy));
+                renderApp(parseLocalMidnight(savedDate), parseInt(savedExpectancy));
             } else {
                 document.getElementById('setup-panel').classList.remove('hidden');
             }
@@ -482,7 +489,8 @@
                 return;
             }
 
-            const birthDate = new Date(dateInput);
+            // Parse as local midnight
+            const birthDate = parseLocalMidnight(dateInput);
             const today = new Date();
             
             if (birthDate > today) {
